@@ -40,18 +40,34 @@ export default function App() {
     setResume((prev) => ({ ...prev, [type]: updated }));
   };
 
-  // ============================================================
-  // SAVE RESUME
-  // ============================================================
-  const saveToServer = async () => {
-    try {
-      await axios.post(`${API}/api/resumes`, resume);
-      alert("Saved!");
-    } catch (error) {
-      console.error(error);
-      alert("Save failed");
+ // ============================================================
+// SAVE RESUME
+// ============================================================
+const saveToServer = async () => {
+  try {
+    const ADMIN_KEY = import.meta.env.VITE_ADMIN_KEY;
+
+    if (!ADMIN_KEY) {
+      alert("Admin key missing. Save disabled.");
+      return;
     }
-  };
+
+    await axios.post(
+      `${API}/api/resumes`,
+      resume,
+      {
+        headers: {
+          "x-admin-key": ADMIN_KEY,
+        },
+      }
+    );
+
+    alert("Resume saved successfully!");
+  } catch (error) {
+    console.error("Save error:", error);
+    alert("Save failed");
+  }
+};
 
   // ============================================================
   // AI SUGGESTIONS
