@@ -7,11 +7,11 @@ const router = express.Router();
 /* ============================
    PUBLIC: SAVE RESUME
 ============================ */
-router.post("/", async (req, res) => {
+router.post("/", adminAuth, async (req, res) => {
   try {
     const doc = new Resume(req.body);
     await doc.save();
-    res.status(201).json({ ok: true });
+    res.status(201).json({ ok: true, resume: doc });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
@@ -22,9 +22,9 @@ router.post("/", async (req, res) => {
 ============================ */
 router.use(adminAuth); // 🔥 THIS LINE IS CRITICAL
 
-router.get("/", async (req, res) => {
-  const resumes = await Resume.find().sort({ createdAt: -1 });
-  res.json(resumes);
+router.get("/", adminAuth, async (req, res) => {
+  const list = await Resume.find().sort({ createdAt: -1 });
+  res.json({ ok: true, list });
 });
 
 router.get("/:id", async (req, res) => {

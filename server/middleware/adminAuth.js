@@ -1,9 +1,10 @@
 export const adminAuth = (req, res, next) => {
-  const apiKey = req.headers["x-api-key"];
+  const adminKey = req.headers["x-admin-key"];
 
-  if (!apiKey || apiKey !== process.env.ADMIN_API_KEY) {
+  if (!adminKey || adminKey !== process.env.ADMIN_API_KEY) {
     return res.status(401).json({
-      error: "Unauthorized: Invalid or missing API key"
+      ok: false,
+      error: "Unauthorized: Invalid admin key",
     });
   }
 
