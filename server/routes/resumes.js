@@ -1,13 +1,16 @@
 import express from "express";
 import Resume from "../models/Resume.js";
-import { adminAuth } from "../middleware/adminAuth.js";
+import adminAuth from "../middleware/adminAuth.js";
 
 const router = express.Router();
 
 /* ============================
-   PUBLIC: SAVE RESUME
+   🔒 PROTECT ALL ROUTES
 ============================ */
-router.post("/", adminAuth, async (req, res) => {
+router.use(adminAuth);
+
+/* CREATE RESUME */
+router.post("/", async (req, res) => {
   try {
     const doc = new Resume(req.body);
     await doc.save();
@@ -17,21 +20,19 @@ router.post("/", adminAuth, async (req, res) => {
   }
 });
 
-/* ============================
-   🔒 ADMIN ONLY ROUTES
-============================ */
-router.use(adminAuth); // 🔥 THIS LINE IS CRITICAL
-
-router.get("/", adminAuth, async (req, res) => {
+/* READ ALL */
+router.get("/", async (req, res) => {
   const list = await Resume.find().sort({ createdAt: -1 });
   res.json({ ok: true, list });
 });
 
+/* READ ONE */
 router.get("/:id", async (req, res) => {
   const resume = await Resume.findById(req.params.id);
-  res.json(resume);
+  res.json({ ok: true, resume });
 });
 
+/* DELETE */
 router.delete("/:id", async (req, res) => {
   await Resume.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
