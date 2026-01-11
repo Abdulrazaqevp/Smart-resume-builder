@@ -53,7 +53,7 @@ const saveToServer = async () => {
     }
 
     await axios.post(
-      `${API}/resumes`,   // ✅ FIXED: removed extra /api
+      `${API}/api/resumes`,   // ✅ FIXED: removed extra /api
       resume,
       {
         headers: {
