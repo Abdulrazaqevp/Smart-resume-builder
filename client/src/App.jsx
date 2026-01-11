@@ -53,10 +53,11 @@ const saveToServer = async () => {
     }
 
     await axios.post(
-      `${API}/api/resumes`,
+      `${API}/resumes`,   // ✅ FIXED: removed extra /api
       resume,
       {
         headers: {
+          "Content-Type": "application/json",
           "x-admin-key": ADMIN_KEY,
         },
       }
@@ -64,10 +65,15 @@ const saveToServer = async () => {
 
     alert("Resume saved successfully!");
   } catch (error) {
-    console.error("Save error:", error);
+    console.error(
+      "Save error:",
+      error.response?.status,
+      error.response?.data || error.message
+    );
     alert("Save failed");
   }
 };
+
 
   // ============================================================
   // AI SUGGESTIONS
