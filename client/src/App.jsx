@@ -58,7 +58,7 @@ const saveToServer = async () => {
       {
         headers: {
           "Content-Type": "application/json",
-          "x-admin-key": ADMIN_KEY,
+          "x-admin-key": import.meta.env.VITE_ADMIN_KEY,
         },
       }
     );
