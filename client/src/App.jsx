@@ -20,6 +20,15 @@ export default function App() {
     education: []
   });
 
+  const [sections, setSections] = useState([
+  { id: "summary", label: "Summary", enabled: true },
+  { id: "skills", label: "Skills", enabled: true },
+  { id: "experience", label: "Experience", enabled: true },
+  { id: "education", label: "Education", enabled: true },
+  
+]);
+
+
   const [suggestions, setSuggestions] = useState(null);
   const [matchResult, setMatchResult] = useState(null);
 
@@ -29,16 +38,27 @@ export default function App() {
   // DRAG–DROP SORTING
   // ============================================================
   const handleDragEnd = (result) => {
-    if (!result.destination) return;
+  if (!result.destination) return;
 
-    const { source, destination, type } = result;
+  const { source, destination, type } = result;
 
-    const updated = [...resume[type]];
+  // SECTION REORDER
+  if (type === "sections") {
+    const updated = [...sections];
     const [moved] = updated.splice(source.index, 1);
     updated.splice(destination.index, 0, moved);
+    setSections(updated);
+    return;
+  }
 
-    setResume((prev) => ({ ...prev, [type]: updated }));
-  };
+  // EXISTING SKILLS / EXPERIENCE LOGIC
+  const updated = [...resume[type]];
+  const [moved] = updated.splice(source.index, 1);
+  updated.splice(destination.index, 0, moved);
+
+  setResume((prev) => ({ ...prev, [type]: updated }));
+};
+
 
  // ============================================================
 // SAVE RESUME
@@ -169,11 +189,15 @@ const saveToServer = async () => {
             <h2 className="text-xl font-semibold mb-4 text-blue-300">Resume Editor</h2>
 
             <ResumeForm
-              resume={resume}
-              setResume={setResume}
-              getSuggestions={getSuggestions}
-              saveToServer={saveToServer}
-            />
+  resume={resume}
+  setResume={setResume}
+  sections={sections}
+  setSections={setSections}
+  template={template}
+  getSuggestions={getSuggestions}
+  saveToServer={saveToServer}
+/>
+
           </div>
 
           {/* ============ PREVIEW PANEL ============ */}
@@ -192,11 +216,12 @@ const saveToServer = async () => {
                 <option value="modern">Modern</option>
                 <option value="minimal">Minimal ATS</option>
                 <option value="corporate">Corporate</option>
-                <option value="creative">Creative</option>
+                <option value="custom">Custom</option>
               </select>
             </div>
 
-            <Preview resume={resume} template={template} />
+            <Preview resume={resume} template={template} sections={sections}/>
+
           </div>
 
           {/* ============ RIGHT PANEL (AI + ATS) ============ */}
@@ -225,4 +250,5 @@ const saveToServer = async () => {
     </div>
   );
 }
+
 

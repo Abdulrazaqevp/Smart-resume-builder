@@ -1,9 +1,11 @@
 import React, { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-import { Document, Packer, Paragraph, TextRun } from "docx";
+import { Document, Packer, Paragraph, TextRun, ExternalHyperlink } from "docx";
+
 import { saveAs } from "file-saver";
 
-export default function Preview({ resume, template }) {
+export default function Preview({ resume, template, sections }) {
+
   const printRef = useRef();
 
   // PDF EXPORT
@@ -13,27 +15,142 @@ export default function Preview({ resume, template }) {
 
   // DOCX EXPORT
   const exportToDocx = () => {
-    const doc = new Document({
-      sections: [
-        {
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({ text: resume.name, size: 32, bold: true }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph(`${resume.contact.email} | ${resume.contact.phone}`),
-            new Paragraph(`${resume.summary || ""}`),
-          ],
-        },
-      ],
-    });
+  const children = [];
+  
 
-    Packer.toBlob(doc).then((blob) => {
-      saveAs(blob, `${resume.name || "resume"}.docx`);
+  // NAME
+  children.push(
+    new Paragraph({
+      children: [
+        new TextRun({ text: resume.name, size: 32, bold: true }),
+      ],
+      spacing: { after: 200 },
+    })
+  );
+
+  // CONTACT LINE
+  children.push(
+    new Paragraph({
+      children: [
+        resume.contact.email &&
+          new TextRun({ text: resume.contact.email + " | " }),
+
+        resume.contact.phone &&
+          new TextRun({ text: resume.contact.phone + " | " }),
+
+        resume.contact.location &&
+          new TextRun({ text: resume.contact.location + " | " }),
+
+        resume.contact.linkedin &&
+          new ExternalHyperlink({
+            link: resume.contact.linkedin,
+            children: [
+              new TextRun({
+                text: "LinkedIn",
+                style: "Hyperlink",
+              }),
+            ],
+          }),
+      ].filter(Boolean),
+      spacing: { after: 200 },
+    })
+  );
+
+  // SUMMARY
+  if (resume.summary) {
+    children.push(
+      new Paragraph({
+        text: "Summary",
+        bold: true,
+        spacing: { before: 200 },
+      }),
+      new Paragraph(resume.summary)
+    );
+  }
+
+  // SKILLS
+  if (resume.skills.length) {
+    children.push(
+      new Paragraph({
+        text: "Skills",
+        bold: true,
+        spacing: { before: 200 },
+      }),
+      new Paragraph(resume.skills.filter(Boolean).join(" • "))
+    );
+  }
+
+  // EXPERIENCE
+  if (resume.experience.length) {
+    children.push(
+      new Paragraph({
+        text: "Experience",
+        bold: true,
+        spacing: { before: 200 },
+      })
+    );
+
+    resume.experience.forEach((exp) => {
+      children.push(
+        new Paragraph({
+          text: `${exp.title} — ${exp.company}`,
+          bold: true,
+        })
+      );
+
+      exp.bullets.forEach((b) => {
+        children.push(
+          new Paragraph({
+            text: b,
+            size:22,
+            bullet: { level: 0 },
+            before:40,
+            after:40,
+          })
+        );
+      });
     });
-  };
+  }
+
+  // EDUCATION
+  if (resume.education.length) {
+    children.push(
+      new Paragraph({
+        text: "Education",
+        bold: true,
+        spacing: { before: 200 },
+      })
+    );
+
+    resume.education.forEach((ed) => {
+      children.push(
+        new Paragraph({
+          text: `${ed.degree} — ${ed.school}`,
+        })
+      );
+    });
+  }
+
+  const doc = new Document({
+  styles: {
+    default: {
+      document: {
+        run: {
+          font: "Calibri",
+          size: 22, // 11pt (docx uses half-points)
+        },
+      },
+    },
+  },
+  sections: [{ children }],
+});
+
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(blob, `${resume.name || "resume"}.docx`);
+  });
+};
+
 
   // ==========================
   // TEMPLATES
@@ -44,10 +161,26 @@ export default function Preview({ resume, template }) {
     <div className="text-white space-y-6">
       <header className="border-b border-white/10 pb-3 mb-4">
         <h1 className="text-3xl font-bold tracking-tight">{resume.name}</h1>
-        <p className="text-sm text-blue-200 mt-1">
-          {resume.contact.email} • {resume.contact.phone} •{" "}
-          {resume.contact.location}
-        </p>
+        <p className="text-sm text-blue-200 mt-1 flex flex-wrap gap-x-2">
+  {resume.contact.email && <span>{resume.contact.email}</span>}
+  {resume.contact.phone && <span>• {resume.contact.phone}</span>}
+  {resume.contact.location && <span>• {resume.contact.location}</span>}
+  {resume.contact.linkedin && (
+    <span>
+      •{" "}
+      <a
+        href={resume.contact.linkedin}
+        target="_blank"
+        rel="noreferrer"
+        className="text-blue-400 underline"
+      >
+        LinkedIn
+      </a>
+    </span>
+  )}
+</p>
+
+
       </header>
 
       {resume.summary && (
@@ -104,9 +237,25 @@ export default function Preview({ resume, template }) {
   const renderMinimalATS = () => (
     <div className="text-white space-y-4 font-mono">
       <h1 className="text-2xl font-bold">{resume.name}</h1>
-      <p className="text-blue-200 text-sm">
-        {resume.contact.email} | {resume.contact.phone}
-      </p>
+      <p className="text-sm text-blue-200 mt-1 flex flex-wrap gap-x-2">
+  {resume.contact.email && <span>{resume.contact.email}</span>}
+  {resume.contact.phone && <span>• {resume.contact.phone}</span>}
+  {resume.contact.location && <span>• {resume.contact.location}</span>}
+  {resume.contact.linkedin && (
+    <span>
+      •{" "}
+      <a
+        href={resume.contact.linkedin}
+        target="_blank"
+        rel="noreferrer"
+        className="text-blue-400 underline"
+      >
+        LinkedIn
+      </a>
+    </span>
+  )}
+</p>
+
 
       <h2 className="text-blue-300 font-semibold">SUMMARY</h2>
       <p className="text-blue-100">{resume.summary}</p>
@@ -133,9 +282,25 @@ export default function Preview({ resume, template }) {
   const renderCorporate = () => (
     <div className="text-white space-y-6 border-l-4 pl-4 border-blue-500">
       <h1 className="text-3xl font-bold text-blue-300">{resume.name}</h1>
-      <p className="text-blue-200">
-        {resume.contact.email} | {resume.contact.phone}
-      </p>
+      <p className="text-sm text-blue-200 mt-1 flex flex-wrap gap-x-2">
+  {resume.contact.email && <span>{resume.contact.email}</span>}
+  {resume.contact.phone && <span>• {resume.contact.phone}</span>}
+  {resume.contact.location && <span>• {resume.contact.location}</span>}
+  {resume.contact.linkedin && (
+    <span>
+      •{" "}
+      <a
+        href={resume.contact.linkedin}
+        target="_blank"
+        rel="noreferrer"
+        className="text-blue-400 underline"
+      >
+        LinkedIn
+      </a>
+    </span>
+  )}
+</p>
+
 
       <h2 className="text-lg font-semibold text-blue-300">Summary</h2>
       <p className="text-blue-100">{resume.summary}</p>
@@ -162,52 +327,155 @@ export default function Preview({ resume, template }) {
     </div>
   );
 
-  /** 🌙 CREATIVE TEMPLATE */
-  const renderCreative = () => (
-    <div className="text-white grid grid-cols-3 gap-6">
-      <div className="bg-blue-900/40 p-4 rounded-xl border border-white/10">
-        <h1 className="text-2xl font-bold text-blue-300">{resume.name}</h1>
-        <p className="text-blue-200">{resume.contact.email}</p>
-        <p className="text-blue-200">{resume.contact.phone}</p>
+/** 🌙 CUSTOM TEMPLATE (defult as moden) */
+const renderCustom = () => (
+  <div className="text-white space-y-6">
+    <header className="border-b border-white/10 pb-3 mb-4">
+      <h1 className="text-3xl font-bold tracking-tight">
+        {resume.name}
+      </h1>
+<p className="text-sm text-blue-200 mt-1 flex flex-wrap gap-x-2">
+  {resume.contact.email && <span>{resume.contact.email}</span>}
+  {resume.contact.phone && <span>• {resume.contact.phone}</span>}
+  {resume.contact.location && <span>• {resume.contact.location}</span>}
+  {resume.contact.linkedin && (
+    <span>
+      •{" "}
+      <a
+        href={resume.contact.linkedin}
+        target="_blank"
+        rel="noreferrer"
+        className="text-blue-400 underline"
+      >
+        LinkedIn
+      </a>
+    </span>
+  )}
+</p>
 
-        <h2 className="mt-4 text-lg font-semibold text-blue-300">Skills</h2>
-        <ul className="list-disc ml-5 text-blue-100">
-          {resume.skills.map((s, i) => (
-            <li key={i}>{s}</li>
-          ))}
-        </ul>
-      </div>
+    </header>
 
-      <div className="col-span-2 space-y-5">
-        <section>
-          <h2 className="text-xl font-semibold text-blue-300">Summary</h2>
-          <p className="text-blue-100">{resume.summary}</p>
-        </section>
+    {sections
+      .filter((s) => s.enabled)
+      .map((section) => {
+        switch (section.id) {
+          case "summary":
+            return resume.summary ? (
+              <section key="summary">
+                <h2 className="text-blue-300 font-semibold mb-1">Summary</h2>
+                <p className="text-blue-100">{resume.summary}</p>
+              </section>
+            ) : null;
 
-        <section>
-          <h2 className="text-xl font-semibold text-blue-300">Experience</h2>
-          {resume.experience.map((exp, i) => (
-            <div key={i} className="mb-4">
-              <p className="font-bold text-blue-200">{exp.title}</p>
-              <p className="text-blue-400">{exp.company}</p>
-              <ul className="list-disc ml-6 text-blue-100">
-                {exp.bullets.map((b, bi) => (
-                  <li key={bi}>{b}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </section>
-      </div>
-    </div>
-  );
+          case "skills":
+            return resume.skills.length ? (
+              <section key="skills">
+                <h2 className="text-blue-300 font-semibold mb-1">Skills</h2>
+                <ul className="grid grid-cols-2 list-disc ml-5 text-blue-100">
+                  {resume.skills.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </section>
+            ) : null;
+
+          case "experience":
+            return resume.experience.map((exp, i) => (
+              <section key={`exp-${i}`}>
+                <h3 className="font-bold text-blue-300">
+                  {exp.title} —{" "}
+                  <span className="text-blue-100 font-normal">
+                    {exp.company}
+                  </span>
+                </h3>
+                <ul className="list-disc ml-5 text-blue-100">
+                  {exp.bullets.map((b, bi) => (
+                    <li key={bi}>{b}</li>
+                  ))}
+                </ul>
+              </section>
+            ));
+
+          case "education":
+            return resume.education.map((ed, i) => (
+              <section key={`edu-${i}`}>
+                <h2 className="text-blue-300 font-semibold mb-1">Education</h2>
+                <p className="text-blue-100 font-semibold">{ed.degree}</p>
+                <p className="text-blue-100">{ed.school}</p>
+              </section>
+            ));
+
+          default:
+            return null;
+        }
+      })}
+  </div>
+);
+
+
+
+
+
+const renderSummary = () =>
+  resume.summary ? (
+    <section>
+      <h2 className="text-blue-300 font-semibold mb-1">Summary</h2>
+      <p className="text-blue-100 leading-relaxed">{resume.summary}</p>
+    </section>
+  ) : null;
+
+const renderSkills = () =>
+  resume.skills.length ? (
+    <section>
+      <h2 className="text-blue-300 font-semibold mb-1">Skills</h2>
+      <ul className="grid grid-cols-2 list-disc ml-5 text-blue-100">
+        {resume.skills.map((s, i) => (
+          <li key={i}>{s}</li>
+        ))}
+      </ul>
+    </section>
+  ) : null;
+
+const renderExperience = () =>
+  resume.experience.map((exp, i) => (
+    <section key={i}>
+      <h3 className="font-bold text-blue-300">
+        {exp.title} —{" "}
+        <span className="text-blue-100 font-normal">{exp.company}</span>
+      </h3>
+      <p className="text-xs text-blue-400 italic mb-2">
+        {exp.startDate} – {exp.endDate}
+      </p>
+      <ul className="list-disc ml-5 text-blue-100">
+        {exp.bullets.map((b, bi) => (
+          <li key={bi}>{b}</li>
+        ))}
+      </ul>
+    </section>
+  ));
+
+const renderEducation = () =>
+  resume.education.length ? (
+    <section>
+      <h2 className="text-blue-300 font-semibold mb-1">Education</h2>
+      {resume.education.map((ed, i) => (
+        <div key={i} className="mb-3">
+          <p className="font-semibold text-blue-200">{ed.degree}</p>
+          <p className="text-blue-100">{ed.school}</p>
+        </div>
+      ))}
+    </section>
+  ) : null;
+
+
 
   const templateMap = {
-    modern: renderModern,
-    minimal: renderMinimalATS,
-    corporate: renderCorporate,
-    creative: renderCreative,
-  };
+  modern: renderModern,
+  minimal: renderMinimalATS,
+  corporate: renderCorporate,
+  custom: renderCustom,
+};
+
 
   return (
     <div className="text-white">

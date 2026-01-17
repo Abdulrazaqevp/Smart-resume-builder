@@ -4,9 +4,13 @@ import { Droppable, Draggable } from "@hello-pangea/dnd";
 export default function ResumeForm({
   resume,
   setResume,
+  sections,
+  setSections,
+  template,
   getSuggestions,
   saveToServer,
 }) {
+
   const update = (path, value) => {
     const parts = path.split(".");
     setResume((prev) => {
@@ -72,8 +76,57 @@ export default function ResumeForm({
     "w-full px-3 py-2 rounded-lg shadow-sm bg-white/10 border border-white/20 " +
     "text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400";
 
-  return (
+    return (
     <div className="space-y-6 text-sm text-white">
+
+{template === "custom" && (
+  <div className="mb-6 p-3 rounded-xl bg-white/5 border border-white/10">
+    <h3 className="font-semibold text-blue-300 mb-3 text-base">
+      Customize Layout
+    </h3>
+
+    <Droppable droppableId="sections" type="sections">
+      {(provided) => (
+        <div ref={provided.innerRef} {...provided.droppableProps}>
+          {sections.map((section, i) => (
+            <Draggable
+              key={section.id}
+              draggableId={section.id}
+              index={i}
+            >
+              {(drag) => (
+                <div
+                  ref={drag.innerRef}
+                  {...drag.draggableProps}
+                  {...drag.dragHandleProps}
+                  className="flex items-center justify-between mb-2 px-3 py-2
+                             bg-white/10 border border-white/10 rounded-lg cursor-grab"
+                >
+                  <span>{section.label}</span>
+
+                  <input
+                    type="checkbox"
+                    checked={section.enabled}
+                    onChange={() => {
+                      const copy = [...sections];
+                      copy[i].enabled = !copy[i].enabled;
+                      setSections(copy);
+                    }}
+                  />
+                </div>
+              )}
+            </Draggable>
+          ))}
+          {provided.placeholder}
+        </div>
+      )}
+    </Droppable>
+  </div>
+)}
+
+
+
+  
 
       {/* BASIC INFO */}
       <div className="space-y-3">
@@ -105,6 +158,22 @@ export default function ResumeForm({
           value={resume.summary}
           onChange={(e) => update("summary", e.target.value)}
         />
+
+
+        <input
+  className={inputClass}
+  placeholder="Location (City, Country)"
+  value={resume.contact.location}
+  onChange={(e) => update("contact.location", e.target.value)}
+/>
+
+<input
+  className={inputClass}
+  placeholder="LinkedIn (linkedin.com/in/username)"
+  value={resume.contact.linkedin}
+  onChange={(e) => update("contact.linkedin", e.target.value)}
+/>
+
       </div>
 
       {/* SKILLS */}
@@ -320,3 +389,5 @@ export default function ResumeForm({
     </div>
   );
 }
+
+
