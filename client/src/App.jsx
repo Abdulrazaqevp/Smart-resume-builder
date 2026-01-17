@@ -45,21 +45,13 @@ export default function App() {
 // ============================================================
 const saveToServer = async () => {
   try {
-    const ADMIN_KEY = import.meta.env.VITE_ADMIN_KEY;
-
-    if (!ADMIN_KEY) {
-      alert("Admin key missing. Save disabled.");
-      return;
-    }
-
     await axios.post(
-      `${API}/api/resumes`,   // ✅ FIXED: removed extra /api
+      `${API}/api/resumes`,
       resume,
       {
         headers: {
-          "Content-Type": "application/json",
-          "x-admin-key": import.meta.env.VITE_ADMIN_KEY,
-        },
+          "Content-Type": "application/json"
+        }
       }
     );
 
@@ -73,6 +65,7 @@ const saveToServer = async () => {
     alert("Save failed");
   }
 };
+
 
 
   // ============================================================
@@ -232,3 +225,4 @@ const saveToServer = async () => {
     </div>
   );
 }
+

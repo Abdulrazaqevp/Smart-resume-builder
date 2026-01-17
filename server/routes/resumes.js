@@ -5,11 +5,8 @@ import adminAuth from "../middleware/adminAuth.js";
 const router = express.Router();
 
 /* ============================
-   🔒 PROTECT ALL ROUTES
+   PUBLIC ROUTE
 ============================ */
-router.use(adminAuth);
-
-/* CREATE RESUME */
 router.post("/", async (req, res) => {
   try {
     const doc = new Resume(req.body);
@@ -20,20 +17,20 @@ router.post("/", async (req, res) => {
   }
 });
 
-/* READ ALL */
-router.get("/", async (req, res) => {
+/* ============================
+   ADMIN ROUTES
+============================ */
+router.get("/", adminAuth, async (req, res) => {
   const list = await Resume.find().sort({ createdAt: -1 });
   res.json({ ok: true, list });
 });
 
-/* READ ONE */
-router.get("/:id", async (req, res) => {
+router.get("/:id", adminAuth, async (req, res) => {
   const resume = await Resume.findById(req.params.id);
   res.json({ ok: true, resume });
 });
 
-/* DELETE */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", adminAuth, async (req, res) => {
   await Resume.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
 });
