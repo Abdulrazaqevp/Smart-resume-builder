@@ -1,5 +1,4 @@
-[smart_resume_builder_project_documentation.md](https://github.com/user-attachments/files/24762619/smart_resume_builder_project_documentation.md)
-**# Smart Resume Builder**
+** Smart Resume Builder**
 
 ## Overview
 Smart Resume Builder is a full‑stack web application that enables users to create, customize, and export professional resumes with real‑time preview. The project is designed around **data consistency**, **clean architecture**, and **reliable document generation**.
