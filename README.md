@@ -95,7 +95,7 @@ GROQ_API_KEY=
 ADMIN_API_KEY=
 PORT=
 
-**🛡️ Responsible Usage****
+**🛡️ Responsible Usage**
 
 This project is intended for:
 Educational use
