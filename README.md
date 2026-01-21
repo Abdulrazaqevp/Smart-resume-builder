@@ -1,5 +1,5 @@
 [smart_resume_builder_project_documentation.md](https://github.com/user-attachments/files/24762619/smart_resume_builder_project_documentation.md)
-# Smart Resume Builder
+**# Smart Resume Builder**
 
 ## Overview
 Smart Resume Builder is a full‑stack web application that enables users to create, customize, and export professional resumes with real‑time preview. The project is designed around **data consistency**, **clean architecture**, and **reliable document generation**.
@@ -78,3 +78,32 @@ Instead of saving individual fields, the backend stores the **complete snapshot*
 ## Conclusion
 Smart Resume Builder demonstrates real‑world full‑stack engineering principles such as single source of truth, atomic data persistence, and scalable architecture. It is built as a foundation for a professional‑grade resume optimization platform.
 
+
+
+**🔐 Security & Configuration Notice**
+
+This project follows standard security practices for public repositories:
+No secrets are committed to the source code.
+All sensitive configuration (API keys, database URLs, admin keys) is managed using environment variables.
+.env files are explicitly excluded via .gitignore.
+The repository contains only sanitized, public-safe code suitable for learning, review, and demonstration purposes.
+Debug logging avoids printing sensitive values; only presence checks are used where necessary.
+Environment Variables Required
+The following environment variables must be provided locally or via your deployment platform:
+
+MONGO_URL=
+GROQ_API_KEY=
+ADMIN_API_KEY=
+PORT=
+
+**🛡️ Responsible Usage****
+
+This project is intended for:
+Educational use
+Portfolio demonstration
+Technical evaluation
+It is not recommended to deploy this project to production without additional security hardening such as:
+Rate limiting
+Request validation
+Authentication token rotation
+Secure logging and monitoring
