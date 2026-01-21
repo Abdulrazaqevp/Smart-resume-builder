@@ -12,9 +12,9 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 // SHOW VALUES — must NOT be undefined
 console.log("ENV CHECK:");
-console.log("GROQ_API_KEY =", process.env.GROQ_API_KEY);
-console.log("MONGO_URL =", process.env.MONGO_URL);
-console.log("PORT =", process.env.PORT);
+console.log("GROQ_API_KEY :", !!process.env.GROQ_API_KEY);
+console.log("MONGO_URL :", !!process.env.MONGO_URL);
+console.log("PORT :", !!process.env.PORT);
 
 import express from "express";
 import cors from "cors";
