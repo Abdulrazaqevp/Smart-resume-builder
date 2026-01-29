@@ -79,6 +79,9 @@ export default function ResumeForm({
     return (
     <div className="space-y-6 text-sm text-white">
 
+
+
+
 {template === "custom" && (
   <div className="mb-6 p-3 rounded-xl bg-white/5 border border-white/10">
     <h3 className="font-semibold text-blue-300 mb-3 text-base">

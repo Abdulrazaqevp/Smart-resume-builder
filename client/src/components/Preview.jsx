@@ -56,94 +56,100 @@ export default function Preview({ resume, template, sections }) {
     })
   );
 
-  // SUMMARY
-  if (resume.summary) {
-    children.push(
-      new Paragraph({
-        text: "Summary",
-        bold: true,
-        spacing: { before: 200 },
-      }),
-      new Paragraph(resume.summary)
-    );
-  }
 
-  // SKILLS
-  if (resume.skills.length) {
-    children.push(
-      new Paragraph({
-        text: "Skills",
-        bold: true,
-        spacing: { before: 200 },
-      }),
-      new Paragraph(resume.skills.filter(Boolean).join(" • "))
-    );
-  }
+//other changes
 
-  // EXPERIENCE
-  if (resume.experience.length) {
-    children.push(
-      new Paragraph({
-        text: "Experience",
-        bold: true,
-        spacing: { before: 200 },
-      })
-    );
+sections
+  .filter(section => section.enabled)
+  .forEach(section => {
+    switch (section.id) {
 
-    resume.experience.forEach((exp) => {
-      children.push(
-        new Paragraph({
-          text: `${exp.title} — ${exp.company}`,
-          bold: true,
-        })
-      );
+      case "summary":
+        if (resume.summary) {
+          children.push(
+            new Paragraph({
+              text: "Summary",
+              bold: true,
+              spacing: { before: 200 },
+            }),
+            new Paragraph(resume.summary)
+          );
+        }
+        break;
 
-      exp.bullets.forEach((b) => {
-        children.push(
-          new Paragraph({
-            text: b,
-            size:22,
-            bullet: { level: 0 },
-            before:40,
-            after:40,
-          })
-        );
-      });
-    });
-  }
+      case "skills":
+        if (resume.skills.length) {
+          children.push(
+            new Paragraph({
+              text: "Skills",
+              bold: true,
+              spacing: { before: 200 },
+            }),
+            new Paragraph(resume.skills.filter(Boolean).join(" • "))
+          );
+        }
+        break;
 
-  // EDUCATION
-  if (resume.education.length) {
-    children.push(
-      new Paragraph({
-        text: "Education",
-        bold: true,
-        spacing: { before: 200 },
-      })
-    );
+      case "experience":
+        if (resume.experience.length) {
+          children.push(
+            new Paragraph({
+              text: "Experience",
+              bold: true,
+              spacing: { before: 200 },
+            })
+          );
 
-    resume.education.forEach((ed) => {
-      children.push(
-        new Paragraph({
-          text: `${ed.degree} — ${ed.school}`,
-        })
-      );
-    });
-  }
+          resume.experience.forEach(exp => {
+            children.push(
+              new Paragraph({
+                text: `${exp.title} — ${exp.company}`,
+                bold: true,
+              })
+            );
+
+            exp.bullets.forEach(b => {
+              children.push(
+                new Paragraph({
+                  text: b,
+                  bullet: { level: 0 },
+                })
+              );
+            });
+          });
+        }
+        break;
+
+      case "education":
+        if (resume.education.length) {
+          children.push(
+            new Paragraph({
+              text: "Education",
+              bold: true,
+              spacing: { before: 200 },
+            })
+          );
+
+          resume.education.forEach(ed => {
+            children.push(
+              new Paragraph({
+                text: `${ed.degree} — ${ed.school}`,
+              })
+            );
+          });
+        }
+        break;
+
+      default:
+        break;
+    }
+  });
+
 
   const doc = new Document({
-  styles: {
-    default: {
-      document: {
-        run: {
-          font: "Calibri",
-          size: 22, // 11pt (docx uses half-points)
-        },
-      },
-    },
-  },
-  sections: [{ children }],
-});
+    styles: {},
+    sections: [{ children }],
+  });
 
 
   Packer.toBlob(doc).then((blob) => {
