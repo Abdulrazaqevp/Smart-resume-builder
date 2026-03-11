@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import AnimatedButton from "./AnimatedButton";
 import { motion, AnimatePresence } from "framer-motion";
+import { notify } from "../lib/notifications";
 
 export default function SuggestionsPanel({
   suggestions,
@@ -25,16 +26,20 @@ export default function SuggestionsPanel({
   const C = 2 * Math.PI * R;
 
   const handleRunMatch = () => {
-    if (!jobDescription.trim()) return alert("Paste job description first.");
+    if (!jobDescription.trim()) {
+      notify.warning("Paste a job description before running ATS match.", "Job description required");
+      return;
+    }
+
     matchResume(jobDescription);
   };
 
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert("Copied to clipboard");
+      notify.success("Copied to clipboard.", "Copied");
     } catch {
-      alert("Copy failed");
+      notify.error("Clipboard copy failed.", "Copy failed");
     }
   };
 
@@ -43,13 +48,20 @@ export default function SuggestionsPanel({
     setIsApplyingAll(true);
 
     try {
-      if (suggestions.summary) applySuggestion({ summary: suggestions.summary });
+      if (suggestions.summary) {
+        applySuggestion({ summary: suggestions.summary }, { silent: true });
+      }
       if (suggestions.improvedBullets?.length)
-        applySuggestion({ improvedBullets: suggestions.improvedBullets });
+        applySuggestion(
+          { improvedBullets: suggestions.improvedBullets },
+          { silent: true }
+        );
 
-      setTimeout(() => alert("All suggestions applied!"), 300);
+      setTimeout(() => {
+        notify.success("Summary updates were applied. Review bullet improvements manually.", "Suggestions applied");
+      }, 300);
     } catch {
-      alert("Failed to apply");
+      notify.error("Suggestions couldn't be applied.", "Apply failed");
     }
     setIsApplyingAll(false);
   };

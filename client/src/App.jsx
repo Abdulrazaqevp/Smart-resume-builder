@@ -6,6 +6,7 @@ import axios from "axios";
 import { DragDropContext } from "@hello-pangea/dnd";
 import { FaGithub, FaLinkedin, FaInstagram, FaBug } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { notify } from "./lib/notifications";
 
 export default function App() {
   // Works on both local and deployed
@@ -75,14 +76,14 @@ const saveToServer = async () => {
       }
     );
 
-    alert("Resume saved successfully!");
+    notify.success("Resume saved successfully.", "Saved");
   } catch (error) {
     console.error(
       "Save error:",
       error.response?.status,
       error.response?.data || error.message
     );
-    alert("Save failed");
+    notify.error("We couldn't save the resume right now.", "Save failed");
   }
 };
 
@@ -95,9 +96,10 @@ const saveToServer = async () => {
     try {
       const response = await axios.post(`${API}/api/suggest`, { resume });
       setSuggestions(response.data.result);
+      notify.success("AI suggestions are ready to review.", "Suggestions ready");
     } catch (error) {
       console.error(error);
-      alert("AI Suggestion failed");
+      notify.error("AI suggestions couldn't be generated.", "Suggestion failed");
     }
   };
 
@@ -111,9 +113,10 @@ const saveToServer = async () => {
         jobDescription
       });
       setMatchResult(response.data.result);
+      notify.success("ATS analysis completed.", "Match complete");
     } catch (err) {
       console.error("ATS Match Error:", err);
-      alert("ATS Match failed");
+      notify.error("ATS match couldn't be completed.", "Match failed");
     }
   };
 
@@ -231,12 +234,17 @@ const saveToServer = async () => {
               suggestions={suggestions}
               matchResult={matchResult}
               matchResume={matchResume}
-              applySuggestion={(patch) => {
+              applySuggestion={(patch, options = {}) => {
                 if (patch.summary) {
                   setResume((r) => ({ ...r, summary: patch.summary }));
+                  if (!options.silent) {
+                    notify.success("Summary applied to the resume.", "Summary updated");
+                  }
                 }
                 if (patch.improvedBullets) {
-                  alert("Bullet patch applied (mapping needed).");
+                  if (!options.silent) {
+                    notify.bulletMappingNeeded();
+                  }
                 }
               }}
             />
